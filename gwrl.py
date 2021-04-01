@@ -26,25 +26,29 @@ class GWRL:
 
     def generate_obstacle(self):
         """ add an obstacle """
-        #obstacle = np.random.randint(min(self.rows,self.cols), size=(2,2))
-        for i in range(self.rows//4,3*self.rows//4):
-            for j in range(self.cols//4,3*self.cols//4):
-                self.grid[i,j] = -1*1e8
+        obstacle = np.random.randint(min(self.rows,self.cols), size=(2,2))
+        for i in range(obstacle[0,0],obstacle[0,1]):
+            for j in range(obstacle[1,0],obstacle[1,1]):
+                self.grid[i,j] = -1*1e20
+        """
+        for i in range(self.rows//4, 3*self.rows//4):
+            for j in range(self.cols//4, 3*self.cols//4):
+                self.grid[i,j] = -1*1e20
+        """
 
     def make_prefix_sums(self):
         """
           find path from start to end
         """
-        self.grid2=self.grid
+        self.grid_sum=self.grid
         for y in range(1,self.cols):
-            self.grid2[0,y]+=self.grid2[0,y-1]
+            self.grid_sum[0,y]+=self.grid_sum[0,y-1]
         for x in range(1,self.rows):
-            self.grid2[x,0]+=self.grid2[x-1,0]
+            self.grid_sum[x,0]+=self.grid_sum[x-1,0]
         for x in range(1,self.rows):
             for y in range(1,self.cols):
-                self.grid2[x,y] += \
-                        max(self.grid2[x-1,y],self.grid2[x,y-1])
-
+                self.grid_sum[x,y] += \
+                        max(self.grid_sum[x-1,y],self.grid_sum[x,y-1])
 
     def find_path(self):
         x,y=0,0
@@ -54,15 +58,16 @@ class GWRL:
             mx=-1*1e20
             (x2,y2) = (x,y)
             if x+1<self.rows:
-                if self.grid[x+1,y] > mx:
+                if self.grid_sum[x+1,y] > mx:
                     (x2,y2) = (x+1,y)
-                    mx = self.grid[x2,y2]                    
+                    mx = self.grid_sum[x2,y2]                    
             if y+1<self.cols:
-                if self.grid[x,y+1] > mx:
+                if self.grid_sum[x,y+1] > mx:
                     (x2,y2) = (x,y+1)
-                    mx = self.grid[x2,y2]                    
+                    mx = self.grid_sum[x2,y2]                    
             (x,y) = (x2,y2)
             self.path.append((x,y)) 
+        
 
     def show_path(self):
         print(self.path) ; print()
@@ -88,7 +93,7 @@ class GWRL:
 """
 def main():
     obj = GWRL(16,16,[ 0.25, 0.25, 0.25, 0.25 ],-1,1)
-    obj.generate_obstacle()
+    #obj.generate_obstacle()
     obj.show_array()
 
     for i in range(100):
