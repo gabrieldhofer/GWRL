@@ -22,7 +22,6 @@ class GWRL:
                     temp_grid[ i,j ] += self.policy[0] * (self.reward + self.gamma * self.grid[ (i-1 if i>0 else i),j ])
                     temp_grid[ i,j ] += self.policy[0] * (self.reward + self.gamma * self.grid[ i,(j+1 if j<self.cols-1 else j) ])
                     temp_grid[ i,j ] += self.policy[0] * (self.reward + self.gamma * self.grid[ i,(j-1 if j>0 else j) ])
-
         self.grid = temp_grid
 
     def generate_obstacle(self):
@@ -32,7 +31,7 @@ class GWRL:
             for j in range(self.cols//4,3*self.cols//4):
                 self.grid[i,j] = -1*1e8
 
-    def find_path(self):
+    def make_prefix_sums(self):
         """
           find path from start to end
         """
@@ -46,23 +45,22 @@ class GWRL:
                 self.grid2[x,y] += \
                         max(self.grid2[x-1,y],self.grid2[x,y-1])
 
-        print(self.grid2)
+
+    def find_path(self):
         x,y=0,0
         self.path=[(x,y)]
 
         while(x!=self.rows-1 or y!=self.cols-1):
-            mx=-1*1e12
+            mx=-1*1e20
             (x2,y2) = (x,y)
             if x+1<self.rows:
                 if self.grid[x+1,y] > mx:
                     (x2,y2) = (x+1,y)
                     mx = self.grid[x2,y2]                    
-
             if y+1<self.cols:
                 if self.grid[x,y+1] > mx:
                     (x2,y2) = (x,y+1)
                     mx = self.grid[x2,y2]                    
-
             (x,y) = (x2,y2)
             self.path.append((x,y)) 
 
@@ -74,29 +72,37 @@ class GWRL:
             self.grid[point[0],point[1]]=0
 
     def show_array(self):
-        print(self.grid) ; print()
+        for i in range(self.rows):
+            for j in range(self.cols):
+                print("%.2f" % self.grid[i,j], end='   ')
+            print()
+        print() ; print()
 
     def show_heatmap(self):
         plt.imshow(self.grid, cmap=plt.cm.bwr)
         plt.show()
 
+
 """
 
 """
 def main():
-    obj = GWRL(8,8,[ 0.25, 0.25, 0.25, 0.25 ],-1,1)
+    obj = GWRL(16,16,[ 0.25, 0.25, 0.25, 0.25 ],-1,1)
     obj.generate_obstacle()
     obj.show_array()
 
-    for i in range(1000):
+    for i in range(100):
         obj.train()
+        obj.show_array()
     
     obj.show_array()
+
+    obj.make_prefix_sums()
     obj.find_path()
 
     obj.draw_path()
     obj.show_heatmap()
-    obj.show_path()
+    #obj.show_path()
 
 
 main()
