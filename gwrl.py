@@ -14,52 +14,24 @@ class GWRL:
         self.gamma = gamma
         self.grid = np.zeros([rows,cols], dtype=float)
 
+    def update_grid(self,rows_lst,cols_lst):
+        """ iterate through grid """
+        temp_grid = np.zeros([self.rows,self.cols], dtype=float)
+        for i in rows_lst:
+            for j in cols_lst:
+                if (not (i==0 and j==0)) and (not (i==self.rows-1 and j==self.cols-1)):
+                    temp_grid[ i,j ] += self.policy[0] * (self.reward + self.gamma * self.grid[ (i+1 if i<self.rows-1 else i),j ])
+                    temp_grid[ i,j ] += self.policy[0] * (self.reward + self.gamma * self.grid[ (i-1 if i>0 else i),j ])
+                    temp_grid[ i,j ] += self.policy[0] * (self.reward + self.gamma * self.grid[ i,(j+1 if j<self.cols-1 else j) ])
+                    temp_grid[ i,j ] += self.policy[0] * (self.reward + self.gamma * self.grid[ i,(j-1 if j>0 else j) ])
+        self.grid = temp_grid
+
     def train(self):
         """ Update grid values based on the policy  """
-        temp_grid = np.zeros([self.rows,self.cols], dtype=float)
-        for i in range(self.rows):
-            for j in range(self.cols):
-                if (not (i==0 and j==0)) and (not (i==self.rows-1 and j==self.cols-1)):
-                    temp_grid[ i,j ] += self.policy[0] * (self.reward + self.gamma * self.grid[ (i+1 if i<self.rows-1 else i),j ])
-                    temp_grid[ i,j ] += self.policy[0] * (self.reward + self.gamma * self.grid[ (i-1 if i>0 else i),j ])
-                    temp_grid[ i,j ] += self.policy[0] * (self.reward + self.gamma * self.grid[ i,(j+1 if j<self.cols-1 else j) ])
-                    temp_grid[ i,j ] += self.policy[0] * (self.reward + self.gamma * self.grid[ i,(j-1 if j>0 else j) ])
-        self.grid = temp_grid
-
-        temp_grid = np.zeros([self.rows,self.cols], dtype=float)
-        for i in range(self.rows)[::-1]:
-            for j in range(self.cols):
-                if (not (i==0 and j==0)) and (not (i==self.rows-1 and j==self.cols-1)):
-                    temp_grid[ i,j ] += self.policy[0] * (self.reward + self.gamma * self.grid[ (i+1 if i<self.rows-1 else i),j ])
-                    temp_grid[ i,j ] += self.policy[0] * (self.reward + self.gamma * self.grid[ (i-1 if i>0 else i),j ])
-                    temp_grid[ i,j ] += self.policy[0] * (self.reward + self.gamma * self.grid[ i,(j+1 if j<self.cols-1 else j) ])
-                    temp_grid[ i,j ] += self.policy[0] * (self.reward + self.gamma * self.grid[ i,(j-1 if j>0 else j) ])
-        self.grid = temp_grid
-
-        temp_grid = np.zeros([self.rows,self.cols], dtype=float)
-        for i in range(self.rows):
-            for j in range(self.cols)[::-1]:
-                if (not (i==0 and j==0)) and (not (i==self.rows-1 and j==self.cols-1)):
-                    temp_grid[ i,j ] += self.policy[0] * (self.reward + self.gamma * self.grid[ (i+1 if i<self.rows-1 else i),j ])
-                    temp_grid[ i,j ] += self.policy[0] * (self.reward + self.gamma * self.grid[ (i-1 if i>0 else i),j ])
-                    temp_grid[ i,j ] += self.policy[0] * (self.reward + self.gamma * self.grid[ i,(j+1 if j<self.cols-1 else j) ])
-                    temp_grid[ i,j ] += self.policy[0] * (self.reward + self.gamma * self.grid[ i,(j-1 if j>0 else j) ])
-        self.grid = temp_grid
-
-        temp_grid = np.zeros([self.rows,self.cols], dtype=float)
-        for i in range(self.rows)[::-1]:
-            for j in range(self.cols)[::-1]:
-                if (not (i==0 and j==0)) and (not (i==self.rows-1 and j==self.cols-1)):
-                    temp_grid[ i,j ] += self.policy[0] * (self.reward + self.gamma * self.grid[ (i+1 if i<self.rows-1 else i),j ])
-                    temp_grid[ i,j ] += self.policy[0] * (self.reward + self.gamma * self.grid[ (i-1 if i>0 else i),j ])
-                    temp_grid[ i,j ] += self.policy[0] * (self.reward + self.gamma * self.grid[ i,(j+1 if j<self.cols-1 else j) ])
-                    temp_grid[ i,j ] += self.policy[0] * (self.reward + self.gamma * self.grid[ i,(j-1 if j>0 else j) ])
-        self.grid = temp_grid
-
-
-
-
-
+        self.update_grid(range(self.rows),range(self.cols))
+        self.update_grid(range(self.rows)[::-1],range(self.cols))
+        self.update_grid(range(self.rows),range(self.cols)[::-1])
+        self.update_grid(range(self.rows)[::-1],range(self.cols)[::-1])
 
     def show_array(self):
         for i in range(self.rows):
@@ -69,7 +41,9 @@ class GWRL:
         print() ; print()
 
     def generate_obstacle(self):
-        """ add an obstacle (a square in the middle of the image) """
+        """ 
+            creates an obstacle (a square in the middle of the image) 
+        """
         for i in range(3*self.rows//8, 6*self.rows//8):
             for j in range(3*self.cols//8, 6*self.cols//8):
                 self.grid[i,j] = -1*1e10
@@ -142,10 +116,10 @@ class GWRL:
 """
 import time
 def main():
-    obj = GWRL(16, 16, [ 0.25, 0.25, 0.25, 0.25 ], -1, 1)
+    obj = GWRL(32, 32, [ 0.25, 0.25, 0.25, 0.25 ], -1, 1)
     obj.generate_obstacle()
 
-    for i in range(20):
+    for i in range(100):
         obj.train()
 
     obj.make_prefix_sums()
