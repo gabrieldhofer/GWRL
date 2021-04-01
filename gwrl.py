@@ -51,7 +51,7 @@ class GWRL:
         self.path=[(x,y)]
 
         while(x!=self.rows-1 or y!=self.cols-1):
-            mx=-1*1e6
+            mx=-1*1e12
             (x2,y2) = (x,y)
             if x+1<self.rows:
                 if self.grid[x+1,y] > mx:
@@ -63,35 +63,18 @@ class GWRL:
                     (x2,y2) = (x,y+1)
                     mx = self.grid[x2,y2]                    
 
-            """
-            if x-1>=0:
-                if self.grid[x-1,y] > mx:
-                    (x2,y2) = (x-1,y)
-                    mx = self.grid[x2,y2]                    
-
-            if y-1>=0:
-                if self.grid[x,y-1] > mx:
-                    (x2,y2) = (x,y-1)
-                    mx = self.grid[x2,y2]                    
-            """
-
             (x,y) = (x2,y2)
-            print("mx: "+str(mx))
-
-            print("current point: "+str((x,y)))
             self.path.append((x,y)) 
-            print("current path: "+str(self.path))
-            print()
 
     def show_path(self):
-        print(self.path)
+        print(self.path) ; print()
 
     def draw_path(self):
         for point in self.path:
             self.grid[point[0],point[1]]=0
 
     def show_array(self):
-        print(self.grid)
+        print(self.grid) ; print()
 
     def show_heatmap(self):
         plt.imshow(self.grid, cmap=plt.cm.bwr)
@@ -109,7 +92,6 @@ def main():
         obj.train()
     
     obj.show_array()
-    return
     obj.find_path()
 
     obj.draw_path()
