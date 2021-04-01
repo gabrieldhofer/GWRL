@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import PIL
 
 
 class GWRL:
@@ -70,16 +71,6 @@ class GWRL:
         for point in self.path:
             self.grid[point[0],point[1]]=0
 
-    def show_path_and_obstacle(self):
-        self.output = np.zeros([self.rows, self.cols], dtype=float)
-        for point in self.path:
-            self.output[point[0],point[1]]=0
-        for i in range(self.rows//4, 3*self.rows//4):
-            for j in range(self.cols//4, 3*self.cols//4):
-                self.output[i,j] = -1*1e6
-        plt.imshow(self.output, cmap=plt.cm.bwr)
-        plt.show()
-
     def show_array(self):
         for i in range(self.rows):
             for j in range(self.cols):
@@ -91,34 +82,38 @@ class GWRL:
         plt.imshow(self.grid, cmap=plt.cm.bwr)
         plt.show()
 
+    def show_path_and_obstacle(self):
+        self.output = np.zeros([self.rows, self.cols], dtype=float)
+        for point in self.path:
+            self.output[point[0],point[1]]=0
+        for i in range(self.rows//4, 3*self.rows//4):
+            for j in range(self.cols//4, 3*self.cols//4):
+                self.output[i,j] = -1*1e6
+        plt.imshow(self.output)
+        plt.show()
+
+
+
+
 
 """
 
 """
 import time
 def main():
-    obj = GWRL(8, 8, [ 0.25, 0.25, 0.25, 0.25 ], -1, 1)
+    obj = GWRL(16, 16, [ 0.25, 0.25, 0.25, 0.25 ], -1, 1)
     obj.generate_obstacle()
-    obj.show_array()
 
-    for i in range(10):
+    for i in range(100):
         obj.train()
-        obj.show_array()
-    
-    print('here 1')
-    obj.show_array()
+
 
     obj.make_prefix_sums()
-    print('here 2')
     obj.find_path()
-    print('here 3')
-    obj.show_path()
-
     obj.draw_path()
-    #obj.show_heatmap()
+    obj.show_heatmap()
 
 
-    obj.show_path_and_obstacle()
 
 main()
 
