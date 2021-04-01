@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import PIL
+from PIL import Image, ImageDraw
+import math
 
 
 class GWRL:
@@ -25,52 +26,6 @@ class GWRL:
                     temp_grid[ i,j ] += self.policy[0] * (self.reward + self.gamma * self.grid[ i,(j-1 if j>0 else j) ])
         self.grid = temp_grid
 
-    def generate_obstacle(self):
-        """ add an obstacle """
-        for i in range(3*self.rows//8, 6*self.rows//8):
-            for j in range(3*self.cols//8, 6*self.cols//8):
-                self.grid[i,j] = -1*1e6
-
-    def make_prefix_sums(self):
-        """
-          find path from start to end
-        """
-        self.grid_sum=self.grid
-        for y in range(1,self.cols):
-            self.grid_sum[0,y]+=self.grid_sum[0,y-1]
-        for x in range(1,self.rows):
-            self.grid_sum[x,0]+=self.grid_sum[x-1,0]
-        for x in range(1,self.rows):
-            for y in range(1,self.cols):
-                self.grid_sum[x,y] += \
-                        max(self.grid_sum[x-1,y],self.grid_sum[x,y-1])
-
-    def find_path(self):
-        x,y=0,0
-        self.path=[(x,y)]
-
-        while(x!=self.rows-1 or y!=self.cols-1):
-            mx=-1*1e20
-            (x2,y2) = (x,y)
-            if x+1<self.rows:
-                if self.grid_sum[x+1,y] > mx:
-                    (x2,y2) = (x+1,y)
-                    mx = self.grid_sum[x2,y2]                    
-            if y+1<self.cols:
-                if self.grid_sum[x,y+1] > mx:
-                    (x2,y2) = (x,y+1)
-                    mx = self.grid_sum[x2,y2]                    
-            (x,y) = (x2,y2)
-            self.path.append((x,y)) 
-        
-
-    def show_path(self):
-        print(self.path) ; print()
-
-    def draw_path(self):
-        for point in self.path:
-            self.grid[point[0],point[1]]=0
-
     def show_array(self):
         for i in range(self.rows):
             for j in range(self.cols):
@@ -78,23 +33,74 @@ class GWRL:
             print()
         print() ; print()
 
+    def generate_obstacle(self):
+        """ add an obstacle (a square in the middle of the image) """
+        for i in range(3*self.rows//8, 6*self.rows//8):
+            for j in range(3*self.cols//8, 6*self.cols//8):
+                self.grid[i,j] = -1*1e10
+
+    def make_prefix_sums(self):
+        """ find path from start to end """
+        self.grid=self.grid
+        for y in range(1,self.cols):
+            self.grid[0,y]+=self.grid[0,y-1]
+        for x in range(1,self.rows):
+            self.grid[x,0]+=self.grid[x-1,0]
+        for x in range(1,self.rows):
+            for y in range(1,self.cols):
+                self.grid[x,y] += \
+                        max(self.grid[x-1,y],self.grid[x,y-1])
+
+    def find_path(self):
+        """ start at 0,0 and choose the smallest neighboring square """
+        x,y=0,0
+        self.path=[(x,y)]
+        while(x!=self.rows-1 or y!=self.cols-1):
+            mx=-1*1e20
+            (x2,y2) = (x,y)
+            if x+1<self.rows:
+                if self.grid[x+1,y] > mx:
+                    (x2,y2) = (x+1,y)
+                    mx = self.grid[x2,y2]                    
+            if y+1<self.cols:
+                if self.grid[x,y+1] > mx:
+                    (x2,y2) = (x,y+1)
+                    mx = self.grid[x2,y2]                    
+            (x,y) = (x2,y2)
+            self.path.append((x,y)) 
+
+    def draw_path(self):
+        """ paints each square in the path the same color """
+        for point in self.path:
+            self.grid[point[0],point[1]]=0
+
     def show_heatmap(self):
+        """ display heatmap """
         plt.imshow(self.grid, cmap=plt.cm.bwr)
         plt.show()
 
-    def show_path_and_obstacle(self):
-        self.output = np.zeros([self.rows, self.cols], dtype=float)
+    def fix_it(self):
+        bg_color = self.grid[1,0]
+        obstacle_color= self.grid[self.rows-1,0]
+        for i in range(self.rows):
+            for j in range(self.cols):
+                if (i,j) not in self.path:
+                    self.grid[i,j]=obstacle_color//2
+        for i in range(3*self.rows//8, 6*self.rows//8):
+            for j in range(3*self.cols//8, 6*self.cols//8):
+                if (i,j) not in self.path:
+                    self.grid[i,j] = obstacle_color
+
+
+    def output_to_image(self):
+        self.output = np.zeros([self.rows,self.cols], dtype=float)
+        for i in range(self.rows):
+            for j in range(self.cols):
+                self.output[i,j] = 0
         for point in self.path:
             self.output[point[0],point[1]]=0
-        for i in range(self.rows//4, 3*self.rows//4):
-            for j in range(self.cols//4, 3*self.cols//4):
-                self.output[i,j] = -1*1e6
         plt.imshow(self.output)
         plt.show()
-
-
-
-
 
 """
 
@@ -107,12 +113,11 @@ def main():
     for i in range(100):
         obj.train()
 
-
     obj.make_prefix_sums()
     obj.find_path()
     obj.draw_path()
+    obj.fix_it()
     obj.show_heatmap()
-
 
 
 main()
