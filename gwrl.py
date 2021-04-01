@@ -24,9 +24,9 @@ class GWRL:
             for j in range(self.cols):
                 if (not (i==0 and j==0)) and (not (i==self.rows-1 and j==self.cols-1)):
                     temp_grid[ i,j ] += self.policy[0] * (self.reward + self.gamma * self.grid[ (i+1 if i<self.rows-1 else i),j ])
-                    temp_grid[ i,j ] += self.policy[0] * (self.reward + self.gamma * self.grid[ (i-1 if i>0 else i),j ])
-                    temp_grid[ i,j ] += self.policy[0] * (self.reward + self.gamma * self.grid[ i,(j+1 if j<self.cols-1 else j) ])
-                    temp_grid[ i,j ] += self.policy[0] * (self.reward + self.gamma * self.grid[ i,(j-1 if j>0 else j) ])
+                    temp_grid[ i,j ] += self.policy[1] * (self.reward + self.gamma * self.grid[ (i-1 if i>0 else i),j ])
+                    temp_grid[ i,j ] += self.policy[2] * (self.reward + self.gamma * self.grid[ i,(j+1 if j<self.cols-1 else j) ])
+                    temp_grid[ i,j ] += self.policy[3] * (self.reward + self.gamma * self.grid[ i,(j-1 if j>0 else j) ])
 
         self.grid = temp_grid
     
