@@ -26,15 +26,9 @@ class GWRL:
 
     def generate_obstacle(self):
         """ add an obstacle """
-        obstacle = np.random.randint(min(self.rows,self.cols), size=(2,2))
-        for i in range(obstacle[0,0],obstacle[0,1]):
-            for j in range(obstacle[1,0],obstacle[1,1]):
-                self.grid[i,j] = -1*1e20
-        """
-        for i in range(self.rows//4, 3*self.rows//4):
-            for j in range(self.cols//4, 3*self.cols//4):
-                self.grid[i,j] = -1*1e20
-        """
+        for i in range(3*self.rows//8, 6*self.rows//8):
+            for j in range(3*self.cols//8, 6*self.cols//8):
+                self.grid[i,j] = -1*1e6
 
     def make_prefix_sums(self):
         """
@@ -76,6 +70,16 @@ class GWRL:
         for point in self.path:
             self.grid[point[0],point[1]]=0
 
+    def show_path_and_obstacle(self):
+        self.output = np.zeros([self.rows, self.cols], dtype=float)
+        for point in self.path:
+            self.output[point[0],point[1]]=0
+        for i in range(self.rows//4, 3*self.rows//4):
+            for j in range(self.cols//4, 3*self.cols//4):
+                self.output[i,j] = -1*1e6
+        plt.imshow(self.output, cmap=plt.cm.bwr)
+        plt.show()
+
     def show_array(self):
         for i in range(self.rows):
             for j in range(self.cols):
@@ -91,24 +95,30 @@ class GWRL:
 """
 
 """
+import time
 def main():
-    obj = GWRL(16,16,[ 0.25, 0.25, 0.25, 0.25 ],-1,1)
-    #obj.generate_obstacle()
+    obj = GWRL(8, 8, [ 0.25, 0.25, 0.25, 0.25 ], -1, 1)
+    obj.generate_obstacle()
     obj.show_array()
 
-    for i in range(100):
+    for i in range(10):
         obj.train()
         obj.show_array()
     
+    print('here 1')
     obj.show_array()
 
     obj.make_prefix_sums()
+    print('here 2')
     obj.find_path()
+    print('here 3')
+    obj.show_path()
 
     obj.draw_path()
-    obj.show_heatmap()
-    #obj.show_path()
+    #obj.show_heatmap()
 
+
+    obj.show_path_and_obstacle()
 
 main()
 
