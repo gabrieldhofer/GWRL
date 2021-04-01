@@ -25,13 +25,12 @@ class GWRL:
 
         self.grid = temp_grid
 
-
     def generate_obstacle(self):
         """ add an obstacle """
-        obstacle = np.random.randint(min(self.rows,self.cols), size=(2,2))
-        for i in range(obstacle[0,:]):
-            for j in range(obstacle[1,:]):
-                self.grid[i,j] = -50 ## <-- the obstacle value
+        #obstacle = np.random.randint(min(self.rows,self.cols), size=(2,2))
+        for i in range(self.rows//4,3*self.rows//4):
+            for j in range(self.cols//4,3*self.cols//4):
+                self.grid[i,j] = -1*1e8
 
     def find_path(self):
         """
@@ -55,9 +54,7 @@ class GWRL:
             mx=-1*1e6
             (x2,y2) = (x,y)
             if x+1<self.rows:
-                print("one")
                 if self.grid[x+1,y] > mx:
-                    print("two")
                     (x2,y2) = (x+1,y)
                     mx = self.grid[x2,y2]                    
 
@@ -65,6 +62,18 @@ class GWRL:
                 if self.grid[x,y+1] > mx:
                     (x2,y2) = (x,y+1)
                     mx = self.grid[x2,y2]                    
+
+            """
+            if x-1>=0:
+                if self.grid[x-1,y] > mx:
+                    (x2,y2) = (x-1,y)
+                    mx = self.grid[x2,y2]                    
+
+            if y-1>=0:
+                if self.grid[x,y-1] > mx:
+                    (x2,y2) = (x,y-1)
+                    mx = self.grid[x2,y2]                    
+            """
 
             (x,y) = (x2,y2)
             print("mx: "+str(mx))
@@ -91,15 +100,23 @@ class GWRL:
 """
 
 """
-obj = GWRL(4,4,[ 0.25, 0.25, 0.25, 0.25 ],-1,1)
-for i in range(1000):
-    obj.train()
+def main():
+    obj = GWRL(8,8,[ 0.25, 0.25, 0.25, 0.25 ],-1,1)
+    obj.generate_obstacle()
     obj.show_array()
-    print()
 
-obj.find_path()
-#obj.show_array()
-#obj.draw_path()
-obj.show_heatmap()
-obj.show_path()
+    for i in range(1000):
+        obj.train()
+    
+    obj.show_array()
+    return
+    obj.find_path()
+
+    obj.draw_path()
+    obj.show_heatmap()
+    obj.show_path()
+
+
+main()
+
 
